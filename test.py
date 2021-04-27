@@ -3,6 +3,67 @@ import unittest
 from bktree import *
 
 
+class TestBKTree(unittest.TestCase):
+    def test_insert_one(self):
+        tree = BKTree()
+        tree.insert("recursive")
+        self.assertTupleEqual(tree.root, ("recursive", {}))
+
+    def test_insert_two(self):
+        tree = BKTree()
+        tree.insert("one")
+        tree.insert("two")
+        self.assertTupleEqual(tree.root, ("one", {3: ("two", {})}))
+
+    def test_wikipedia_example(self):
+        tree = BKTree()
+        words = [
+            "book", "books", "cake", "boo", "cape", "cart", "boon", "cook"]
+        for word in words:
+            tree.insert(word)
+
+        expected = (
+            "book", {
+                1: (
+                    "books", {
+                        2: (
+                            "boo", {
+                                1: ("boon", {}),
+                                2: ("cook", {})})}),
+                4: (
+                    "cake", {
+                        1: ("cape", {}),
+                        2: ("cart", {})})})
+        self.assertTupleEqual(tree.root, expected)
+
+    def test_lookup_one_word(self):
+        tree = BKTree()
+        tree.insert("levenshtein")
+        self.assertEqual(tree.closest_match("levenshtein"), "levenshtein")
+
+    def test_lookup_two_words(self):
+        tree = BKTree()
+        tree.insert("three")
+        tree.insert("one")
+        self.assertEqual(tree.closest_match("two"), "one")
+
+    def test_lookup_no_results(self):
+        tree = BKTree()
+        tree.insert("one")
+        tree.insert("two")
+        self.assertIsNone(tree.closest_match("three", max_distance=2))
+
+    def test_lookup_exact_match(self):
+        tree = BKTree()
+        words = [
+            "book", "books", "cake", "boo", "cape", "cart", "boon", "cook"]
+        
+        for word in words:
+            tree.insert(word)
+
+        self.assertEqual(tree.closest_match("boo", max_distance=1), "boo")
+
+
 class TestLevenshteinDistanceRecursive(unittest.TestCase):
     def test_first_word_empty(self):
         a = ""
